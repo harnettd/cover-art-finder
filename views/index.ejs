@@ -20,19 +20,31 @@
       <section id="query" class="container-fluid">
         <h2>Query Artist</h2>
         <form action="/query" method="post">
-          <label for="query">Artist:</label>
+          <label class="form-label" for="query">Artist:</label>
           <% if (locals.query) { %>
           <input
             type="text"
             name="query"
             id="query"
+            class="form-control"
             value="<%= query %>"
             disabled
           />
-          <input type="submit" value="Submit" disabled />
+          <input
+            type="submit"
+            class="btn btn-primary"
+            value="Submit"
+            disabled
+          />
           <% } else { %>
-          <input type="text" name="query" id="query" required />
-          <input type="submit" value="Submit" />
+          <input
+            type="text"
+            name="query"
+            id="query"
+            class="form-control"
+            required
+          />
+          <input type="submit" class="btn btn-primary" value="Submit" />
           <% } %>
         </form>
       </section>
@@ -42,20 +54,22 @@
         <h2>Disambiguation</h2>
         <form action="/disambiguate" method="post">
           <% artists.forEach((artist) => { %>
-          <input
-            type="radio"
-            name="artist"
-            id="<%= artist.id %>"
-            value="<%= artist.id %>."
-          />
-          <label for="<%= artist.id %>">
-            <ol>
+          <div class="form-check">
+            <input
+              type="radio"
+              class="form-check-input"
+              name="artistId"
+              id="<%= artist.id %>"
+              value="<%= artist.id %>."
+            />
+            <ul>
               <li>Name: <%= artist.name %></li>
               <li>Score: <%= artist.score %></li>
               <li>Country: <%= artist.country %></li>
               <li>Note: <%= artist.disambiguation %></li>
-            </ol>
-          </label>
+            </ul>
+            <label clas="form-check-label" for="<%= artist.id %>"></label>
+          </div>
           <% }) %>
           <input type="submit" value="Submit" />
         </form>

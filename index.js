@@ -15,11 +15,6 @@ const queryArtist = (query) => {
     Accept: "application/json",
     "User-Agent": "cover-art-finder/1.0.0 (DHarnett.dev@proton.me)",
   };
-
-  // console.log(url)
-  // console.log(params)
-  // console.log(headers)
-
   return axios.get(url, { params: params, headers: headers });
 };
 
@@ -38,31 +33,30 @@ const parseArtists = (result) => {
   return artists;
 };
 
-// queryArtist('iron maiden')
-//     .then((result) => {
-//         console.log(parseArtists(result))}
-//     )
-//     .catch((error) => {console.log(error)})
+const getAlbums = (artistId) => {
+  const url = `${musicBrainzApiUrl}/release`;
+  const params = {
+    artist: artistId,
+    type: "album",
+  };
+  const headers = {
+    Accept: "application/json",
+    "User-Agent": "cover-art-finder/1.0.0 (DHarnett.dev@proton.me)",
+  };
+  return axios.get(url, { params: params, headers: headers });
+};
 
-// const getAlbumIds = (artistID) => {
-//     const url = `${musicBrainzApiUrl}/release`
-//     const params = {
-//         artist: artistID,
-//         type: 'album'
-//     }
-//     const headers = {
-//         Accept: 'application/json',
-//         'User-Agent': 'cover-art-finder/1.0.0 (DHarnett.dev@proton.me)'
-//      }
-//     axios.get(url, { params: params, headers: headers })
-//         .then((response) => {
-//             const data = response.data
-//             console.log(data)
-//         })
-//         .catch((error) => {
-//             console.log('getAlbumIds failed')
-//         })
-// }
+const parseAlbums = (result) => {
+  const albums = [];
+  result.data.releases.forEach((album) => {
+    const nextAlbum = {
+      id: album.id,
+      title: album.title,
+    };
+    albums.push(nextAlbum);
+  });
+  return albums;
+};
 
 // const getCoverArtUrl = (albumId) => {
 //     const url = `${coverArtArchiveApiUrl}/release/${albumId}`
@@ -78,7 +72,6 @@ app.post("/query", (req, res) => {
     .then((result) => {
       const artists = parseArtists(result);
       res.render("index.ejs", { query: query, artists: artists });
-      //   console.log(artists);
     })
     .catch((error) => {
       console.log(error.response);
@@ -86,8 +79,17 @@ app.post("/query", (req, res) => {
 });
 
 app.post("/disambiguate", (req, res) => {
-  const artistId = body.id;
+  const artistId = req.body.artistId;
   console.log(artistId);
+  getAlbums(artistId)
+    .then((result) => {
+      const albums = parseAlbums(result);
+      console.log(albums);
+      res.render("index.ejs", { albums: albums });
+    })
+    .catch((error) => {
+      console.log(error.response);
+    });
 });
 
 const port = 3000;

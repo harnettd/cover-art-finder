@@ -3,6 +3,7 @@ import axios from "axios"
 
 const app = express()
 app.use(express.static('public'))
+app.use(express.urlencoded({ extended: true }))
 
 const musicBrainzApiUrl = 'https://musicbrainz.org/ws/2'
 const coverArtArchiveApiUrl = 'https://coverartarchive.org'
@@ -38,11 +39,11 @@ const parseArtists = (result) => {
     return artists
 }
 
-getArtists('iron maiden')
-    .then((result) => {
-        console.log(parseArtists(result))}
-    )
-    .catch((error) => {console.log(error)})
+// queryArtist('iron maiden')
+//     .then((result) => {
+//         console.log(parseArtists(result))}
+//     )
+//     .catch((error) => {console.log(error)})
 
 
 // const getAlbumIds = (artistID) => {
@@ -72,6 +73,15 @@ getArtists('iron maiden')
 
 
 app.get('/', (req, res) => {
+    res.render('index.ejs')
+})
+
+app.get('/query', (req, res) => {
+    console.log('/query reached')
+
+    const body = req.body
+    console.log(body)
+    
     res.render('index.ejs')
 })
 

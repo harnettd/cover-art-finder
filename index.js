@@ -8,6 +8,22 @@ app.use(express.urlencoded({ extended: true }));
 const musicBrainzApiUrl = "https://musicbrainz.org/ws/2";
 const coverArtArchiveApiUrl = "https://coverartarchive.org";
 
+const handleError = (error) => {
+  if (error.response) {
+    console.log("response error");
+    console.log(error.response.status);
+    console.log(error.response.headers);
+    console.log(error.response.data);
+  } else if (error.request) {
+    console.log("request error");
+    console.log(error.request);
+  } else {
+    console.log("other error");
+    console.log(error.message);
+  }
+  //   console.log(error.config);
+};
+
 const queryArtist = (query) => {
   const url = `${musicBrainzApiUrl}/artist`;
   const params = { query: query };
@@ -43,11 +59,17 @@ const getAlbums = (artistId) => {
     Accept: "application/json",
     "User-Agent": "cover-art-finder/1.0.0 (DHarnett.dev@proton.me)",
   };
+
+  //   console.log(url);
+  //   console.log(params);
+  //   console.log(headers);
+
   return axios.get(url, { params: params, headers: headers });
 };
 
 const parseAlbums = (result) => {
   const albums = [];
+  console.log(result.data.releases);
   result.data.releases.forEach((album) => {
     const nextAlbum = {
       id: album.id,
@@ -55,6 +77,7 @@ const parseAlbums = (result) => {
     };
     albums.push(nextAlbum);
   });
+  console.log(albums);
   return albums;
 };
 
@@ -74,22 +97,28 @@ app.post("/query", (req, res) => {
       res.render("index.ejs", { query: query, artists: artists });
     })
     .catch((error) => {
-      console.log(error.response);
+      handleError(error);
     });
 });
 
 app.post("/disambiguate", (req, res) => {
   const artistId = req.body.artistId;
-  console.log(artistId);
+  //   console.log(artistId);
   getAlbums(artistId)
     .then((result) => {
       const albums = parseAlbums(result);
-      console.log(albums);
-      res.render("index.ejs", { albums: albums });
+      //   console.log("Albums:");
+      //   console.log(albums)
+      //   res.render("index.ejs", { albums: albums });
     })
     .catch((error) => {
-      console.log(error.response);
+      handleError(error);
     });
+});
+
+app.post("album-selection", (req, res) => {
+  const body = req.body;
+  console.log(body);
 });
 
 const port = 3000;

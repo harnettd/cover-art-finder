@@ -75,6 +75,9 @@ const parseAlbums = (result) => {
     const nextAlbum = {
       id: album.id,
       title: album.title,
+      status: album.status,
+      disambiguation: album.disambiguation,
+      frontCover: album['cover-art-archive'].front
     };
     albums.push(nextAlbum);
   });
@@ -83,9 +86,9 @@ const parseAlbums = (result) => {
 };
 
 const getCoverArtUrl = (albumId) => {
-    const url = `${coverArtArchiveApiUrl}/release/${albumId}`
+    const url = `${coverArtArchiveApiUrl}/release/${albumId}/front-250`
     const params = {}
-    const headers = {}
+    const headers = {Accept: 'application/json'}
     return axios(url , { params: params, headers: headers})
 }
 
@@ -123,6 +126,15 @@ app.post("/disambiguate", (req, res) => {
 app.post("/album-selection", (req, res) => {
   const albumIds = Object.keys(req.body);
   console.log(albumIds);
+  // Promise.all(albumIds.forEach((albumId) => {
+  //   getCoverArtUrl(albumId)
+  // }))
+  getCoverArtUrl(albumIds[0])
+    .then((coverArtUrls) => {
+      console.log(coverArtUrls)
+      // res.render(indexed.ejs, { coverArtUrls: coverArtUrls })
+    })
+    .catch(handleError)
 });
 
 const port = 3000;

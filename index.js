@@ -54,6 +54,7 @@ const getAlbums = (artistId) => {
   const params = {
     artist: artistId,
     type: "album",
+    limit: 100
   };
   const headers = {
     Accept: "application/json",
@@ -116,7 +117,7 @@ app.post("/disambiguate", (req, res) => {
     });
 });
 
-app.post("album-selection", (req, res) => {
+app.post("/album-selection", (req, res) => {
   const body = req.body;
   console.log(body);
 });

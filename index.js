@@ -69,7 +69,7 @@ const getAlbums = (artistId) => {
 
 const parseAlbums = (result) => {
   const albums = [];
-  console.log(result.data.releases);
+//   console.log(result.data.releases);
   result.data.releases.forEach((album) => {
     const nextAlbum = {
       id: album.id,
@@ -109,7 +109,7 @@ app.post("/disambiguate", (req, res) => {
       const albums = parseAlbums(result);
       //   console.log("Albums:");
       //   console.log(albums)
-      //   res.render("index.ejs", { albums: albums });
+        res.render("index.ejs", { albums: albums });
     })
     .catch((error) => {
       handleError(error);

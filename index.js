@@ -82,9 +82,12 @@ const parseAlbums = (result) => {
   return albums;
 };
 
-// const getCoverArtUrl = (albumId) => {
-//     const url = `${coverArtArchiveApiUrl}/release/${albumId}`
-// }
+const getCoverArtUrl = (albumId) => {
+    const url = `${coverArtArchiveApiUrl}/release/${albumId}`
+    const params = {}
+    const headers = {}
+    return axios(url , { params: params, headers: headers})
+}
 
 app.get("/", (req, res) => {
   res.render("index.ejs");
@@ -118,8 +121,8 @@ app.post("/disambiguate", (req, res) => {
 });
 
 app.post("/album-selection", (req, res) => {
-  const body = req.body;
-  console.log(body);
+  const albumIds = Object.keys(req.body);
+  console.log(albumIds);
 });
 
 const port = 3000;

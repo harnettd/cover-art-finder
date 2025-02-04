@@ -62,37 +62,39 @@
               id="<%= artist.id %>"
               value="<%= artist.id %>"
             />
-            <ul>
-              <li>Name: <%= artist.name %></li>
-              <li>Score: <%= artist.score %></li>
-              <li>Country: <%= artist.country %></li>
-              <li>Note: <%= artist.disambiguation %></li>
-            </ul>
-            <label clas="form-check-label" for="<%= artist.id %>"></label>
+            <label clas="form-check-label" for="<%= artist.id %>">
+              <ul>
+                <li>Name: <%= artist.name %></li>
+                <li>Score: <%= artist.score %></li>
+                <li>Country: <%= artist.country %></li>
+                <li>Note: <%= artist.disambiguation %></li>
+              </ul>
+            </label>
           </div>
           <% }) %>
-          <input type="submit" value="Submit" />
+          <input type="submit" class="btn btn-primary" value="Submit" />
         </form>
       </section>
-
-      <% } %> <% if (locals.albums) { %>
-      <section id="/album-selection" class="container-fluid">
+      <% } %> 
+      
+      <% if (locals.albums) { %>
+      <section id="album-selection" class="container-fluid">
         <h2>Album Selection</h2>
-        <form action="/selection" method="post">
+        <form action="/album-selection" method="post">
           <% albums.forEach((album) => { %>
           <div class="form-check">
             <input
               class="form-check-input"
               type="checkbox"
+              name="<%= album.id %>"
               id="<%= album.id %>"
-              value="<%= album.id %>"
             />
             <label class="form-check-label" for="<%= album.id %>">
               <%= album.title %>
             </label>
           </div>
           <% }) %>
-          <input type="submit" value="Submit">
+          <input type="submit" class="btn btn-primary" value="Submit" />
         </form>
       </section>
       <% } %>

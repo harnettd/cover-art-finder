@@ -1,12 +1,17 @@
 import express from "express";
 import axios from "axios";
 
+const musicBrainzApiUrl = "https://musicbrainz.org/ws/2";
+const coverArtArchiveApiUrl = "https://coverartarchive.org";
+const accept = "application/json";
+const userAgent = "cover-art-finder/1.0.0 (DHarnett.dev@proton.me)";
+const albumType = "album";
+const albumLimit = 250;
+const port = 3000;
+
 const app = express();
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
-
-const musicBrainzApiUrl = "https://musicbrainz.org/ws/2";
-const coverArtArchiveApiUrl = "https://coverartarchive.org";
 
 const handleError = (error) => {
   if (error.response) {
@@ -21,15 +26,15 @@ const handleError = (error) => {
     console.log("other error");
     console.log(error.message);
   }
-  //   console.log(error.config);
+  console.log(error.config);
 };
 
 const queryArtist = (query) => {
   const url = `${musicBrainzApiUrl}/artist`;
   const params = { query: query };
   const headers = {
-    Accept: "application/json",
-    "User-Agent": "cover-art-finder/1.0.0 (DHarnett.dev@proton.me)",
+    Accept: accept,
+    "User-Agent": userAgent,
   };
   return axios.get(url, { params: params, headers: headers });
 };
@@ -53,12 +58,12 @@ const getAlbums = (artistId) => {
   const url = `${musicBrainzApiUrl}/release`;
   const params = {
     artist: artistId,
-    type: "album",
-    limit: 100,
+    type: albumType,
+    limit: albumLimit,
   };
   const headers = {
-    Accept: "application/json",
-    "User-Agent": "cover-art-finder/1.0.0 (DHarnett.dev@proton.me)",
+    Accept: accept,
+    "User-Agent": userAgent,
   };
   return axios.get(url, { params: params, headers: headers });
 };
@@ -84,8 +89,8 @@ const parseAlbums = (result) => {
 const getCoverArtUrl = (albumId) => {
   const url = `${coverArtArchiveApiUrl}/release/${albumId}`;
   const headers = {
-    Accept: "application/json",
-    "User-Agent": "cover-art-finder/1.0.0 (DHarnett.dev@proton.me)",
+    Accept: accept,
+    "User-Agent": userAgent,
   };
   return axios(url, { headers: headers });
 };
@@ -146,7 +151,6 @@ app.post("/album-selection", (req, res) => {
     .catch(handleError);
 });
 
-const port = 3000;
 app.listen(port, () => {
   console.log(`App running on port ${port}`);
 });

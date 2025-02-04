@@ -60,17 +60,11 @@ const getAlbums = (artistId) => {
     Accept: "application/json",
     "User-Agent": "cover-art-finder/1.0.0 (DHarnett.dev@proton.me)",
   };
-
-  //   console.log(url);
-  //   console.log(params);
-  //   console.log(headers);
-
   return axios.get(url, { params: params, headers: headers });
 };
 
 const parseAlbums = (result) => {
   const albums = [];
-  //   console.log(result.data.releases);
   result.data.releases.forEach((album) => {
     const nextAlbum = {
       id: album.id,
@@ -79,7 +73,9 @@ const parseAlbums = (result) => {
       disambiguation: album.disambiguation,
       frontCover: album["cover-art-archive"].front,
     };
-    albums.push(nextAlbum);
+    if (nextAlbum.frontCover) {
+      albums.push(nextAlbum);
+    }
   });
   console.log(albums);
   return albums;
@@ -87,15 +83,15 @@ const parseAlbums = (result) => {
 
 const getCoverArtUrl = (albumId) => {
   const url = `${coverArtArchiveApiUrl}/release/${albumId}`;
-  const headers = { 
+  const headers = {
     Accept: "application/json",
-    "User-Agent": "cover-art-finder/1.0.0 (DHarnett.dev@proton.me)"
+    "User-Agent": "cover-art-finder/1.0.0 (DHarnett.dev@proton.me)",
   };
   return axios(url, { headers: headers });
 };
 
 const parseCoverArtResult = (result) => {
-  console.log(result)
+  console.log(result);
   const images = result.data.images;
   while (images.length > 0) {
     const image = images.pop();
@@ -117,37 +113,35 @@ app.post("/query", (req, res) => {
       const artists = parseArtists(result);
       res.render("index.ejs", { query: query, artists: artists });
     })
-    .catch((error) => {
-      handleError(error);
-    });
+    .catch(handleError);
 });
 
 app.post("/disambiguate", (req, res) => {
   const artistId = req.body.artistId;
-  //   console.log(artistId);
   getAlbums(artistId)
     .then((result) => {
       const albums = parseAlbums(result);
-      //   console.log("Albums:");
-      //   console.log(albums)
       res.render("index.ejs", { albums: albums });
     })
-    .catch((error) => {
-      handleError(error);
-    });
+    .catch(handleError);
 });
 
 app.post("/album-selection", (req, res) => {
   const albumIds = Object.keys(req.body);
   console.log(albumIds);
-  // Promise.all(albumIds.forEach((albumId) => {
-  //   getCoverArtUrl(albumId)
-  // }))
-  getCoverArtUrl(albumIds[0])
-    .then((result) => {
-      const url = parseCoverArtResult(result)
-      console.log(url)
-      res.render("index.ejs", { url: url });
+  const coverArtPromises = [];
+  albumIds.forEach((albumId) => {
+    coverArtPromises.push(getCoverArtUrl(albumId));
+  });
+  Promise.all(coverArtPromises)
+    .then((results) => {
+      console.log(`Number of results: ${results.length}`);
+      const urls = [];
+      results.forEach((result) => {
+        urls.push(parseCoverArtResult(result));
+      });
+      console.log(urls);
+      res.render("index.ejs", { urls: urls });
     })
     .catch(handleError);
 });

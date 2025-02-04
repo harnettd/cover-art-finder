@@ -99,12 +99,14 @@
       </section>
       <% } %>
 
-      <% if (locals.url) { %>
+      <% if (locals.urls) { %>
       <section id="Cover Art">
         <div class="row">
+          <% urls.forEach((url) => { %>
           <div class="col">
-            <img src="<%= url %>" alt="">
+              <img src="<%= url %>" alt="">
           </div>
+          <% }) %>
         </div>
       </section>
       <% } %>

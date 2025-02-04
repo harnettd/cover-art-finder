@@ -98,6 +98,17 @@
         </form>
       </section>
       <% } %>
+
+      <% if (locals.url) { %>
+      <section id="Cover Art">
+        <div class="row">
+          <div class="col">
+            <img src="<%= url %>" alt="">
+          </div>
+        </div>
+      </section>
+      <% } %>
+
     </main>
 
     <script

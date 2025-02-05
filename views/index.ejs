@@ -21,7 +21,7 @@
         <h2>Query Artist</h2>
         <form action="/query" method="post">
           <label class="form-label" for="query">Artist:</label>
-          <% if (locals.appData.query) { %>
+          <% if (appData.query) { %>
           <input
             type="text"
             name="query"
@@ -49,7 +49,7 @@
         </form>
       </section>
 
-      <% if (locals.appData.artists && appData.artists.length >= 1) { %>
+      <% if (appData.artists.length >= 1 && !appData.artistId) { %>
       <section id="disambiguation">
         <h2>Disambiguation</h2>
         <form action="/disambiguate" method="post">
@@ -77,9 +77,10 @@
       </section>
       <% } %> 
       
-      <% if (locals.appData.albums && appData.albums.length > 0) { %>
+      <% if (appData.albums.length > 0) { %>
       <section id="album-selection">
         <h2>Album Selection</h2>
+        <p>Select albums by <%= appData.artistId %>:</p>
         <form action="/album-selection" method="post">
           <% appData.albums.forEach((album) => { %>
           <div class="form-check">
@@ -99,8 +100,8 @@
       </section>
       <% } %>
 
-      <% if (locals.appData.coverArtUrls && appData.coverArtUrls.length > 0) { %>
-      <section id="Cover Art">
+      <% if (appData.coverArtUrls.length > 0) { %>
+      <section id="cover-art">
         <div class="row">
           <% appData.coverArtUrls.forEach((url) => { %>
           <div class="col">

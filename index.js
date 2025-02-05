@@ -110,7 +110,8 @@ const parseCoverArt = (response) => {
 };
 
 app.get("/", (req, res) => {
-  res.render("index.ejs", { appData: appData });
+  res.locals.appData = appData;
+  res.render("index.ejs", { appData: res.locals.appData });
 });
 
 app.post("/query", (req, res) => {
@@ -119,7 +120,6 @@ app.post("/query", (req, res) => {
     .then((response) => {
       appData.artists = parseArtists(response);
       res.redirect("/");
-      // res.render("index.ejs", { appData: appData });
     })
     .catch(handleError);
 });
@@ -129,7 +129,6 @@ app.post("/disambiguate", (req, res) => {
   getAlbums(appData.artistId)
     .then((response) => {
       appData.albums = parseAlbums(response);
-      // res.render("index.ejs", { appData: appData });
       res.redirect("/");
     })
     .catch(handleError);
@@ -146,7 +145,6 @@ app.post("/album-selection", (req, res) => {
         return parseCoverArt(response);
       });
       console.log(appData.coverArtUrls);
-      // res.render("index.ejs", { appData: appData });
       res.redirect("/");
     })
     .catch(handleError);

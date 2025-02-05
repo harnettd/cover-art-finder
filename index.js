@@ -14,6 +14,15 @@ const app = express();
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 
+const appData = {
+  query: null,
+  artists: [],
+  artistId: null,
+  albums: [],
+  albumIds: [],
+  coverArtUrls: []
+};
+
 const handleError = (error) => {
   if (error.response) {
     console.log("response error");
@@ -97,43 +106,44 @@ const parseCoverArt = (response) => {
     .filter((image) => image.front && image.thumbnails["250"])
     .reduce((result, image) => {
       return result ? result : image.thumbnails["250"];
-    }, undefined);
+    }, null);
 };
 
 app.get("/", (req, res) => {
-  res.render("index.ejs");
+  res.render("index.ejs", { appData: appData });
 });
 
 app.post("/query", (req, res) => {
-  const query = req.body.query;
-  queryArtist(query)
-    .then((result) => {
-      const artists = parseArtists(result);
-      res.render("index.ejs", { query: query, artists: artists });
+  appData.query = req.body.query;
+  queryArtist(appData.query)
+    .then((response) => {
+      appData.artists = parseArtists(response);
+      res.render("index.ejs", { appData: appData });
     })
     .catch(handleError);
 });
 
 app.post("/disambiguate", (req, res) => {
-  const artistId = req.body.artistId;
-  getAlbums(artistId)
-    .then((result) => {
-      const albums = parseAlbums(result);
-      res.render("index.ejs", { albums: albums });
+  appData.artistId = req.body.artistId;
+  getAlbums(appData.artistId)
+    .then((response) => {
+      appData.albums = parseAlbums(response);
+      res.render("index.ejs", { appData: appData });
     })
     .catch(handleError);
 });
 
 app.post("/album-selection", (req, res) => {
-  const albumIds = Object.keys(req.body);
-  const coverArtPromises = albumIds.map((albumId) => getCoverArt(albumId));
+  appData.albumIds = Object.keys(req.body);
+  const coverArtPromises =
+    appData.albumIds.map((albumId) => getCoverArt(albumId));
   Promise.all(coverArtPromises)
     .then((responses) => {
-      const coverArtUrls = responses.map((response) => {
+      appData.coverArtUrls = responses.map((response) => {
         return parseCoverArt(response);
       });
-      console.log(coverArtUrls);
-      res.render("index.ejs", { coverArtUrls: coverArtUrls });
+      console.log(appData.coverArtUrls);
+      res.render("index.ejs", { appData: appData });
     })
     .catch(handleError);
 });

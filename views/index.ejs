@@ -17,17 +17,17 @@
     <main class="container">
       <h1>Cover Art Finder</h1>
 
-      <section id="query" class="container-fluid">
+      <section id="query">
         <h2>Query Artist</h2>
         <form action="/query" method="post">
           <label class="form-label" for="query">Artist:</label>
-          <% if (locals.query) { %>
+          <% if (locals.appData.query) { %>
           <input
             type="text"
             name="query"
             id="query"
             class="form-control"
-            value="<%= query %>"
+            value="<%= appData.query %>"
             disabled
           />
           <input
@@ -49,11 +49,11 @@
         </form>
       </section>
 
-      <% if (locals.artists && artists.length >= 1) { %>
-      <section id="disambiguation" class="container-fluid">
+      <% if (locals.appData.artists && appData.artists.length >= 1) { %>
+      <section id="disambiguation">
         <h2>Disambiguation</h2>
         <form action="/disambiguate" method="post">
-          <% artists.forEach((artist) => { %>
+          <% appData.artists.forEach((artist) => { %>
           <div class="form-check">
             <input
               type="radio"
@@ -77,11 +77,11 @@
       </section>
       <% } %> 
       
-      <% if (locals.albums) { %>
-      <section id="album-selection" class="container-fluid">
+      <% if (locals.appData.albums && appData.albums.length > 0) { %>
+      <section id="album-selection">
         <h2>Album Selection</h2>
         <form action="/album-selection" method="post">
-          <% albums.forEach((album) => { %>
+          <% appData.albums.forEach((album) => { %>
           <div class="form-check">
             <input
               class="form-check-input"
@@ -99,10 +99,10 @@
       </section>
       <% } %>
 
-      <% if (locals.coverArtUrls) { %>
+      <% if (locals.appData.coverArtUrls && appData.coverArtUrls.length > 0) { %>
       <section id="Cover Art">
         <div class="row">
-          <% coverArtUrls.forEach((url) => { %>
+          <% appData.coverArtUrls.forEach((url) => { %>
           <div class="col">
               <img src="<%= url %>" alt="">
           </div>

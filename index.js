@@ -5,8 +5,9 @@ const musicBrainzApiUrl = "https://musicbrainz.org/ws/2";
 const coverArtArchiveApiUrl = "https://coverartarchive.org";
 const accept = "application/json";
 const userAgent = "cover-art-finder/1.0.0 (DHarnett.dev@proton.me)";
+const minArtistScore = 75;
 const albumType = "album";
-const albumLimit = 250;
+const albumLimit = 500;
 const port = 3000;
 
 const app = express();
@@ -39,19 +40,18 @@ const queryArtist = (query) => {
   return axios.get(url, { params: params, headers: headers });
 };
 
-const parseArtists = (result) => {
-  const artists = [];
-  result.data.artists.forEach((artist) => {
-    const nextArtist = {
+const parseArtists = (response) => {
+  const artists = response.data.artists;
+  const parsedArtists = artists.map((artist) => {
+    return {
       id: artist.id,
       name: artist.name,
       score: artist.score,
       country: artist.country,
       disambiguation: artist.disambiguation,
     };
-    artists.push(nextArtist);
   });
-  return artists;
+  return parsedArtists.filter((artist) => artist.score >= minArtistScore);
 };
 
 const getAlbums = (artistId) => {
@@ -68,25 +68,21 @@ const getAlbums = (artistId) => {
   return axios.get(url, { params: params, headers: headers });
 };
 
-const parseAlbums = (result) => {
-  const albums = [];
-  result.data.releases.forEach((album) => {
-    const nextAlbum = {
-      id: album.id,
-      title: album.title,
-      status: album.status,
-      disambiguation: album.disambiguation,
-      frontCover: album["cover-art-archive"].front,
-    };
-    if (nextAlbum.frontCover) {
-      albums.push(nextAlbum);
-    }
-  });
-  console.log(albums);
-  return albums;
+const parseAlbums = (response) => {
+  const releases = response.data.releases;
+  return releases
+    .map((release) => {
+      return {
+        id: release.id,
+        title: release.title,
+        disambiguation: release.disambiguation,
+        frontCover: release["cover-art-archive"].front,
+      };
+    })
+    .filter((release) => release.frontCover);
 };
 
-const getCoverArtUrl = (albumId) => {
+const getCoverArt = (albumId) => {
   const url = `${coverArtArchiveApiUrl}/release/${albumId}`;
   const headers = {
     Accept: accept,
@@ -95,16 +91,13 @@ const getCoverArtUrl = (albumId) => {
   return axios(url, { headers: headers });
 };
 
-const parseCoverArtResult = (result) => {
-  console.log(result);
-  const images = result.data.images;
-  while (images.length > 0) {
-    const image = images.pop();
-    if (image.front && image.thumbnails["250"]) {
-      return image.thumbnails["250"];
-    }
-  }
-  return undefined;
+const parseCoverArt = (response) => {
+  const images = response.data.images;
+  return images
+    .filter((image) => image.front && image.thumbnails["250"])
+    .reduce((result, image) => {
+      return result ? result : image.thumbnails["250"];
+    }, undefined);
 };
 
 app.get("/", (req, res) => {
@@ -133,20 +126,14 @@ app.post("/disambiguate", (req, res) => {
 
 app.post("/album-selection", (req, res) => {
   const albumIds = Object.keys(req.body);
-  console.log(albumIds);
-  const coverArtPromises = [];
-  albumIds.forEach((albumId) => {
-    coverArtPromises.push(getCoverArtUrl(albumId));
-  });
+  const coverArtPromises = albumIds.map((albumId) => getCoverArt(albumId));
   Promise.all(coverArtPromises)
-    .then((results) => {
-      console.log(`Number of results: ${results.length}`);
-      const urls = [];
-      results.forEach((result) => {
-        urls.push(parseCoverArtResult(result));
+    .then((responses) => {
+      const coverArtUrls = responses.map((response) => {
+        return parseCoverArt(response);
       });
-      console.log(urls);
-      res.render("index.ejs", { urls: urls });
+      console.log(coverArtUrls);
+      res.render("index.ejs", { coverArtUrls: coverArtUrls });
     })
     .catch(handleError);
 });

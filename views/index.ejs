@@ -49,7 +49,7 @@
         </form>
       </section>
 
-      <% if (locals.artists && artists.length > 1) { %>
+      <% if (locals.artists && artists.length >= 1) { %>
       <section id="disambiguation" class="container-fluid">
         <h2>Disambiguation</h2>
         <form action="/disambiguate" method="post">
@@ -99,10 +99,10 @@
       </section>
       <% } %>
 
-      <% if (locals.urls) { %>
+      <% if (locals.coverArtUrls) { %>
       <section id="Cover Art">
         <div class="row">
-          <% urls.forEach((url) => { %>
+          <% coverArtUrls.forEach((url) => { %>
           <div class="col">
               <img src="<%= url %>" alt="">
           </div>

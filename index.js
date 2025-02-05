@@ -20,7 +20,7 @@ const appData = {
   artistId: null,
   albums: [],
   albumIds: [],
-  coverArtUrls: []
+  coverArtUrls: [],
 };
 
 const handleError = (error) => {
@@ -118,7 +118,8 @@ app.post("/query", (req, res) => {
   queryArtist(appData.query)
     .then((response) => {
       appData.artists = parseArtists(response);
-      res.render("index.ejs", { appData: appData });
+      res.redirect("/");
+      // res.render("index.ejs", { appData: appData });
     })
     .catch(handleError);
 });
@@ -128,22 +129,25 @@ app.post("/disambiguate", (req, res) => {
   getAlbums(appData.artistId)
     .then((response) => {
       appData.albums = parseAlbums(response);
-      res.render("index.ejs", { appData: appData });
+      // res.render("index.ejs", { appData: appData });
+      res.redirect("/");
     })
     .catch(handleError);
 });
 
 app.post("/album-selection", (req, res) => {
   appData.albumIds = Object.keys(req.body);
-  const coverArtPromises =
-    appData.albumIds.map((albumId) => getCoverArt(albumId));
+  const coverArtPromises = appData.albumIds.map((albumId) =>
+    getCoverArt(albumId)
+  );
   Promise.all(coverArtPromises)
     .then((responses) => {
       appData.coverArtUrls = responses.map((response) => {
         return parseCoverArt(response);
       });
       console.log(appData.coverArtUrls);
-      res.render("index.ejs", { appData: appData });
+      // res.render("index.ejs", { appData: appData });
+      res.redirect("/");
     })
     .catch(handleError);
 });

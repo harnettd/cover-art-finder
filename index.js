@@ -1,13 +1,14 @@
 import express from "express";
 import axios from "axios";
 
-const musicBrainzApiUrl = "https://musicbrainz.org/ws/2";
-const coverArtArchiveApiUrl = "https://coverartarchive.org";
+const musicBrainzApiBaseUrl = "https://musicbrainz.org/ws/2";
+const coverArtArchiveApiBaseUrl = "https://coverartarchive.org";
 const accept = "application/json";
 const userAgent = "cover-art-finder/1.0.0 (DHarnett.dev@proton.me)";
 const minArtistScore = 75;
-const albumType = "album";
-const albumLimit = 500;
+const releaseType = "album|ep";
+const releaseStatus = "official";
+const releaseLimit = 100;
 const port = 3000;
 
 const app = express();
@@ -39,46 +40,43 @@ const handleError = (error) => {
   console.log(error.config);
 };
 
-const queryArtist = (query) => {
-  const url = `${musicBrainzApiUrl}/artist`;
-  const params = { query: query };
+const searchArtist = (query) => {
+  const url = "/artist";
+  const baseURL = musicBrainzApiBaseUrl;
+  const params = { query };
   const headers = {
-    Accept: accept,
+    accept,
     "User-Agent": userAgent,
   };
-  return axios.get(url, { params: params, headers: headers });
+  return axios.get(url, { baseURL, params, headers });
 };
 
-const parseArtists = (response) => {
-  const artists = response.data.artists;
+const parseArtists = ({ data: { artists }, status }) => {
   const parsedArtists = artists.map((artist) => {
-    return {
-      id: artist.id,
-      name: artist.name,
-      score: artist.score,
-      country: artist.country,
-      disambiguation: artist.disambiguation,
-    };
+    const { id, name, score, country, disambiguation } = artist;
+    return { id, name, score, country, disambiguation };
   });
   return parsedArtists.filter((artist) => artist.score >= minArtistScore);
 };
 
-const getAlbums = (artistId) => {
-  const url = `${musicBrainzApiUrl}/release`;
+const getAlbums = (artistId, offset=0) => {
+  const url = "/release";
+  const baseURL = musicBrainzApiBaseUrl;
   const params = {
     artist: artistId,
-    type: albumType,
-    limit: albumLimit,
+    type: releaseType,
+    status: releaseStatus,
+    limit: releaseLimit,
+    offset
   };
   const headers = {
-    Accept: accept,
+    accept,
     "User-Agent": userAgent,
   };
-  return axios.get(url, { params: params, headers: headers });
+  return axios.get(url, { baseURL, params, headers });
 };
 
-const parseAlbums = (response) => {
-  const releases = response.data.releases;
+const parseAlbums = ({ data: { releases } }) => {
   return releases
     .map((release) => {
       return {
@@ -92,16 +90,16 @@ const parseAlbums = (response) => {
 };
 
 const getCoverArt = (albumId) => {
-  const url = `${coverArtArchiveApiUrl}/release/${albumId}`;
+  const url = `/release/${albumId}`;
+  const baseURL = coverArtArchiveApiBaseUrl;
   const headers = {
-    Accept: accept,
+    accept,
     "User-Agent": userAgent,
   };
-  return axios(url, { headers: headers });
+  return axios(url, { baseURL, headers });
 };
 
-const parseCoverArt = (response) => {
-  const images = response.data.images;
+const parseCoverArt = ({ data: { images } }) => {
   return images
     .filter((image) => image.front && image.thumbnails["250"])
     .reduce((result, image) => {
@@ -116,7 +114,7 @@ app.get("/", (req, res) => {
 
 app.post("/query", (req, res) => {
   appData.query = req.body.query;
-  queryArtist(appData.query)
+  searchArtist(appData.query)
     .then((response) => {
       appData.artists = parseArtists(response);
       res.redirect("/");

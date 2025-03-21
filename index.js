@@ -9,6 +9,7 @@ const minArtistScore = 75;
 const releaseType = "album|ep";
 const releaseStatus = "official";
 const releaseLimit = 100;
+const releaseGetDelay = 500;
 const port = 3000;
 
 const app = express();
@@ -59,7 +60,7 @@ const parseArtists = ({ data: { artists }, status }) => {
   return parsedArtists.filter((artist) => artist.score >= minArtistScore);
 };
 
-const getAlbums = (artistId, offset=0) => {
+const getAlbums = (artistId) => {
   const url = "/release";
   const baseURL = musicBrainzApiBaseUrl;
   const params = {
@@ -67,26 +68,53 @@ const getAlbums = (artistId, offset=0) => {
     type: releaseType,
     status: releaseStatus,
     limit: releaseLimit,
-    offset
   };
   const headers = {
     accept,
     "User-Agent": userAgent,
   };
-  return axios.get(url, { baseURL, params, headers });
+
+  let rawAlbums = [];
+
+  const getAlbumsBatch = (offset = 0) => {
+    params.offset = offset;
+
+    // console.log(params);
+
+    return axios.get(url, { baseURL, params, headers })
+    .then(({ data }) => {
+      console.log(`Offset : ${data["release-offset"]}`);
+      console.log(`Release count: ${data["release-count"]}`);
+      console.log(`No. releases: ${data.releases.length}\n`);
+
+      const releases = data.releases;
+      rawAlbums = rawAlbums.concat(releases);
+      const newOffset = offset + releases.length;
+
+      if (newOffset >= data["release-count"]) {
+        return rawAlbums;
+      }
+
+      return new Promise((resolve, reject) => {
+        setTimeout(() => resolve(getAlbumsBatch(newOffset)), releaseGetDelay);
+      });
+    });
+  };
+
+  return getAlbumsBatch();
 };
 
-const parseAlbums = ({ data: { releases } }) => {
-  return releases
-    .map((release) => {
+const parseAlbums = (rawAlbums) => {
+  return rawAlbums
+    .map((rawAlbum) => {
       return {
-        id: release.id,
-        title: release.title,
-        disambiguation: release.disambiguation,
-        frontCover: release["cover-art-archive"].front,
+        id: rawAlbum.id,
+        title: rawAlbum.title,
+        disambiguation: rawAlbum.disambiguation,
+        frontCover: rawAlbum["cover-art-archive"].front,
       };
     })
-    .filter((release) => release.frontCover);
+    .filter((rawAlbum) => rawAlbum.frontCover);
 };
 
 const getCoverArt = (albumId) => {
@@ -126,6 +154,8 @@ app.post("/disambiguate", (req, res) => {
   appData.artistId = req.body.artistId;
   getAlbums(appData.artistId)
     .then((response) => {
+      console.log("Resolved!");
+
       appData.albums = parseAlbums(response);
       res.redirect("/");
     })

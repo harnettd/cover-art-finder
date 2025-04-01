@@ -1,7 +1,6 @@
 import express from "express";
 import axios from "axios";
 
-
 // Global variables
 
 const musicBrainzApiBaseUrl = "https://musicbrainz.org/ws/2";
@@ -14,7 +13,6 @@ const releaseStatus = "official";
 const releaseLimit = 100;
 const releaseGetDelay = 500;
 const port = 3000;
-
 
 // App
 
@@ -38,7 +36,6 @@ class AppData {
   }
 }
 const appData = new AppData();
-
 
 // Helper functions
 
@@ -98,7 +95,8 @@ const getAlbums = (artistId) => {
 
     // console.log(params);
 
-    return axios.get(url, { baseURL, params, headers }).then(({ data }) => {
+    return axios.get(url, { baseURL, params, headers })
+    .then(({ data }) => {
       console.log(`Offset : ${data["release-offset"]}`);
       console.log(`Release count: ${data["release-count"]}`);
       console.log(`No. releases: ${data.releases.length}\n`);
@@ -123,8 +121,6 @@ const getAlbums = (artistId) => {
 const isPreferredAlbum = (album, candidate) => {
   const countrySortOrder = ["XW", "US", "CA"];
   const isSameTitle = album.title === candidate.title;
-  const albumCountryIndex = countrySortOrder.indexOf(album.country);
-  const candidateCountryIndex = countrySortOrder.indexOf(candidate.country);
   const isPreferredCountry =
     countrySortOrder.indexOf(album.country) <
     countrySortOrder.indexOf(candidate.country);
@@ -144,6 +140,9 @@ const parseAlbums = (rawAlbums) => {
     })
     .filter((rawAlbum) => rawAlbum.frontCover)
     .reduce((results, rawAlbum) => {
+
+      
+
       if (rawAlbum) {
         return [...results, rawAlbum];
       }
@@ -169,7 +168,6 @@ const parseCoverArt = ({ data: { images } }) => {
     }, null);
 };
 
-
 // Routes
 
 app.get("/", (req, res) => {
@@ -178,7 +176,6 @@ app.get("/", (req, res) => {
 });
 
 app.get("/clear", (req, res) => {
-  console.log("Clear");
   appData.clear();
   res.redirect("/");
 });
@@ -197,8 +194,6 @@ app.post("/disambiguate", (req, res) => {
   appData.artistId = req.body.artistId;
   getAlbums(appData.artistId)
     .then((response) => {
-      console.log(response);
-
       appData.albums = parseAlbums(response);
       res.redirect("/");
     })
@@ -220,7 +215,6 @@ app.post("/album-selection", (req, res) => {
     })
     .catch(handleError);
 });
-
 
 // Listen
 

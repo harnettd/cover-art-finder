@@ -16,6 +16,11 @@
   <body>
     <main class="container">
       <h1>Cover Art Finder</h1>
+      <section id="clear">
+        <form action="/clear" method="get">
+          <input type="submit" class="btn btn-primary" value="Clear" />
+        </form>
+      </section>
 
       <section id="query">
         <h2>Query Artist</h2>
@@ -75,9 +80,7 @@
           <input type="submit" class="btn btn-primary" value="Submit" />
         </form>
       </section>
-      <% } %> 
-      
-      <% if (appData.albums.length > 0) { %>
+      <% } %> <% if (appData.albums.length > 0) { %>
       <section id="album-selection">
         <h2>Album Selection</h2>
         <p>Select albums by <%= appData.artistId %>:</p>
@@ -98,20 +101,17 @@
           <input type="submit" class="btn btn-primary" value="Submit" />
         </form>
       </section>
-      <% } %>
-
-      <% if (appData.coverArtUrls.length > 0) { %>
+      <% } %> <% if (appData.coverArtUrls.length > 0) { %>
       <section id="cover-art">
         <div class="row">
           <% appData.coverArtUrls.forEach((url) => { %>
           <div class="col">
-              <img src="<%= url %>" alt="">
+            <img src="<%= url %>" alt="" />
           </div>
           <% }) %>
         </div>
       </section>
       <% } %>
-
     </main>
 
     <script

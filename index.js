@@ -1,6 +1,9 @@
 import express from "express";
 import axios from "axios";
 
+
+// Global variables
+
 const musicBrainzApiBaseUrl = "https://musicbrainz.org/ws/2";
 const coverArtArchiveApiBaseUrl = "https://coverartarchive.org";
 const accept = "application/json";
@@ -12,18 +15,32 @@ const releaseLimit = 100;
 const releaseGetDelay = 500;
 const port = 3000;
 
+
+// App
+
 const app = express();
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 
-const appData = {
-  query: null,
-  artists: [],
-  artistId: null,
-  albums: [],
-  albumIds: [],
-  coverArtUrls: [],
-};
+class AppData {
+  constructor() {
+    this.clear();
+  }
+
+  clear() {
+    this.query = "";
+    this.artists = [];
+    this.artistId = "";
+    this.artistName = "";
+    this.albums = [];
+    this.albumIds = [];
+    this.coverArtUrls = [];
+  }
+}
+const appData = new AppData();
+
+
+// Helper functions
 
 const handleError = (error) => {
   if (error.response) {
@@ -81,8 +98,7 @@ const getAlbums = (artistId) => {
 
     // console.log(params);
 
-    return axios.get(url, { baseURL, params, headers })
-    .then(({ data }) => {
+    return axios.get(url, { baseURL, params, headers }).then(({ data }) => {
       console.log(`Offset : ${data["release-offset"]}`);
       console.log(`Release count: ${data["release-count"]}`);
       console.log(`No. releases: ${data.releases.length}\n`);
@@ -104,17 +120,35 @@ const getAlbums = (artistId) => {
   return getAlbumsBatch();
 };
 
+const isPreferredAlbum = (album, candidate) => {
+  const countrySortOrder = ["XW", "US", "CA"];
+  const isSameTitle = album.title === candidate.title;
+  const albumCountryIndex = countrySortOrder.indexOf(album.country);
+  const candidateCountryIndex = countrySortOrder.indexOf(candidate.country);
+  const isPreferredCountry =
+    countrySortOrder.indexOf(album.country) <
+    countrySortOrder.indexOf(candidate.country);
+  return isSameTitle && isPreferredCountry;
+};
+
 const parseAlbums = (rawAlbums) => {
   return rawAlbums
     .map((rawAlbum) => {
       return {
         id: rawAlbum.id,
         title: rawAlbum.title,
+        country: rawAlbum.country,
         disambiguation: rawAlbum.disambiguation,
         frontCover: rawAlbum["cover-art-archive"].front,
       };
     })
-    .filter((rawAlbum) => rawAlbum.frontCover);
+    .filter((rawAlbum) => rawAlbum.frontCover)
+    .reduce((results, rawAlbum) => {
+      if (rawAlbum) {
+        return [...results, rawAlbum];
+      }
+      return results;
+    }, []);
 };
 
 const getCoverArt = (albumId) => {
@@ -135,9 +169,18 @@ const parseCoverArt = ({ data: { images } }) => {
     }, null);
 };
 
+
+// Routes
+
 app.get("/", (req, res) => {
   res.locals.appData = appData;
   res.render("index.ejs", { appData: res.locals.appData });
+});
+
+app.get("/clear", (req, res) => {
+  console.log("Clear");
+  appData.clear();
+  res.redirect("/");
 });
 
 app.post("/query", (req, res) => {
@@ -154,7 +197,7 @@ app.post("/disambiguate", (req, res) => {
   appData.artistId = req.body.artistId;
   getAlbums(appData.artistId)
     .then((response) => {
-      console.log("Resolved!");
+      console.log(response);
 
       appData.albums = parseAlbums(response);
       res.redirect("/");
@@ -177,6 +220,9 @@ app.post("/album-selection", (req, res) => {
     })
     .catch(handleError);
 });
+
+
+// Listen
 
 app.listen(port, () => {
   console.log(`App running on port ${port}`);

@@ -14,7 +14,7 @@ const releaseLimit = 100;
 const releaseGetDelay = 500;
 const port = 3000;
 
-// App
+// App and AppData
 
 const app = express();
 app.use(express.static("public"));
@@ -66,13 +66,16 @@ const searchArtist = (query) => {
   return axios.get(url, { baseURL, params, headers });
 };
 
-const parseArtists = ({ data: { artists }, status }) => {
-  const parsedArtists = artists.map((artist) => {
-    const { id, name, score, country, disambiguation } = artist;
-    return { id, name, score, country, disambiguation };
-  });
-  return parsedArtists.filter((artist) => artist.score >= minArtistScore);
-};
+const parseArtists = ({ data: { artists } }) =>
+  artists
+    .filter(({ score }) => score >= minArtistScore)
+    .map(({ id, name, score, country, disambiguation }) => ({
+      id,
+      name,
+      score,
+      country,
+      disambiguation,
+    }));
 
 const getAlbums = (artistId) => {
   const url = "/release";
@@ -88,25 +91,24 @@ const getAlbums = (artistId) => {
     "User-Agent": userAgent,
   };
 
-  let rawAlbums = [];
+  let albums = [];
 
   const getAlbumsBatch = (offset = 0) => {
     params.offset = offset;
 
     // console.log(params);
 
-    return axios.get(url, { baseURL, params, headers })
-    .then(({ data }) => {
-      console.log(`Offset : ${data["release-offset"]}`);
-      console.log(`Release count: ${data["release-count"]}`);
-      console.log(`No. releases: ${data.releases.length}\n`);
+    return axios.get(url, { baseURL, params, headers }).then(({ data }) => {
+      // console.log(`Offset : ${data["release-offset"]}`);
+      // console.log(`Release count: ${data["release-count"]}`);
+      // console.log(`No. releases: ${data.releases.length}\n`);
 
       const releases = data.releases;
-      rawAlbums = rawAlbums.concat(releases);
+      albums = albums.concat(releases);
       const newOffset = offset + releases.length;
 
       if (newOffset >= data["release-count"]) {
-        return rawAlbums;
+        return albums;
       }
 
       return new Promise((resolve, reject) => {
@@ -118,37 +120,41 @@ const getAlbums = (artistId) => {
   return getAlbumsBatch();
 };
 
-const isPreferredAlbum = (album, candidate) => {
-  const countrySortOrder = ["XW", "US", "CA"];
-  const isSameTitle = album.title === candidate.title;
-  const isPreferredCountry =
+const isSameTitle = (album, candidate) =>
+  album.title.toLowerCase() === candidate.title.toLowerCase();
+
+const isPreferredCountry = (album, candidate) => {
+  const countrySortOrder = ["XE", "US", "CA", "XW"];
+  return (
     countrySortOrder.indexOf(album.country) <
-    countrySortOrder.indexOf(candidate.country);
-  return isSameTitle && isPreferredCountry;
+    countrySortOrder.indexOf(candidate.country)
+  );
 };
 
-const parseAlbums = (rawAlbums) => {
-  return rawAlbums
-    .map((rawAlbum) => {
-      return {
-        id: rawAlbum.id,
-        title: rawAlbum.title,
-        country: rawAlbum.country,
-        disambiguation: rawAlbum.disambiguation,
-        frontCover: rawAlbum["cover-art-archive"].front,
-      };
-    })
-    .filter((rawAlbum) => rawAlbum.frontCover)
-    .reduce((results, rawAlbum) => {
+const getPreferred = (album, candidate) =>
+  isPreferredCountry(album, candidate) ? candidate : album;
 
-      
+const deduplicate = (reducedAlbums, candidate) => {
+  const idxDuplicate =
+    reducedAlbums
+      .map((a) => isSameTitle(a, candidate))
+      .indexOf(true);
 
-      if (rawAlbum) {
-        return [...results, rawAlbum];
-      }
-      return results;
-    }, []);
+  if (idxDuplicate === -1) {
+    return reducedAlbums.concat(candidate);
+  }
+
+  const duplicate = reducedAlbums[idxDuplicate];
+  return reducedAlbums
+    .filter((value, index) => index !== idxDuplicate)
+    .concat(getPreferred(duplicate, candidate));
 };
+
+const parseAlbums = (albums) =>
+  albums
+    .filter((album) => album["cover-art-archive"].front)
+    .map(({ id, title, country, date }) => ({ id, title, country, date }))
+    .reduce(deduplicate, []);
 
 const getCoverArt = (albumId) => {
   const url = `/release/${albumId}`;
@@ -193,8 +199,8 @@ app.post("/query", (req, res) => {
 app.post("/disambiguate", (req, res) => {
   appData.artistId = req.body.artistId;
   getAlbums(appData.artistId)
-    .then((response) => {
-      appData.albums = parseAlbums(response);
+    .then((albums) => {
+      appData.albums = parseAlbums(albums);
       res.redirect("/");
     })
     .catch(handleError);

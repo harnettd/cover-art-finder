@@ -1,0 +1,51 @@
+<section id="query">
+  <h2>Query Artist</h2>
+    <form action="/query" method="post" class="row">
+      <div class="col">
+        <% if (appData.artistId) { %>
+          <input
+            type="text"
+            name="query"
+            id="query"
+            class="form-control"
+            value="<%= appData.artistId %>"
+            disabled
+          />
+        <% } else if (appData.query) { %>
+          <input
+            type="text"
+            name="query"
+            id="query"
+            class="form-control"
+            value="<%= appData.query %>"
+            disabled
+          />
+        <% } else { %>
+          <input 
+            type="text" 
+            name="query" 
+            id="query" 
+            class="form-control" 
+            required
+            placeholder="Artist Name"
+          />
+        <% } %>
+      </div>
+      <div class="col-2">
+          <% if (appData.artistName || appData.query) { %>
+            <input type="submit" class="btn btn-primary" value="Submit" disabled />
+          <% } else { %>
+            <input type="submit" class="btn btn-primary" value="Submit" />
+          <% } %>
+      </div>
+      <div class="col-2">
+          <input
+            type="submit"
+            class="btn btn-primary"
+            value="Clear"
+            formaction="/clear"
+            formmethod="get"
+          />
+      </div>
+  </form>
+</section>

@@ -15,44 +15,8 @@
 
   <body>
     <main class="container">
-      <h1>Cover Art Finder</h1>
-      <section id="clear">
-        <form action="/clear" method="get">
-          <input type="submit" class="btn btn-primary" value="Clear" />
-        </form>
-      </section>
-
-      <section id="query">
-        <h2>Query Artist</h2>
-        <form action="/query" method="post">
-          <label class="form-label" for="query">Artist:</label>
-          <% if (appData.query) { %>
-          <input
-            type="text"
-            name="query"
-            id="query"
-            class="form-control"
-            value="<%= appData.query %>"
-            disabled
-          />
-          <input
-            type="submit"
-            class="btn btn-primary"
-            value="Submit"
-            disabled
-          />
-          <% } else { %>
-          <input
-            type="text"
-            name="query"
-            id="query"
-            class="form-control"
-            required
-          />
-          <input type="submit" class="btn btn-primary" value="Submit" />
-          <% } %>
-        </form>
-      </section>
+      <%- include("partials/header.ejs") %>
+      <%- include("partials/query.ejs") %>
 
       <% if (appData.artists.length >= 1 && !appData.artistId) { %>
       <section id="disambiguation">
@@ -67,7 +31,7 @@
               id="<%= artist.id %>"
               value="<%= artist.id %>"
             />
-            <label clas="form-check-label" for="<%= artist.id %>">
+            <label class="form-check-label" for="<%= artist.id %>">
               <ul>
                 <li>Name: <%= artist.name %></li>
                 <li>Score: <%= artist.score %></li>
@@ -112,6 +76,8 @@
         </div>
       </section>
       <% } %>
+
+      <%- include("partials/footer.ejs") %>    
     </main>
 
     <script

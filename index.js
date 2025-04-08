@@ -180,7 +180,6 @@ const parseCoverArt = ({ data: { images } }) => {
 
 app.get("/", (req, res) => {
   res.locals.appData = appData;
-  // res.render("index.ejs", { appData: res.locals.appData });
   res.render("index.ejs", res.locals);
 });
 
@@ -194,6 +193,10 @@ app.post("/query", (req, res) => {
   searchArtist(appData.query)
     .then((response) => {
       appData.artists = parseArtists(response);
+      if (appData.artists.length === 1) {
+        appData.artistId = appData.artists[0].id;
+        appData.artistName = appData.artists[0].name;
+      }
       res.redirect("/");
     })
     .catch(handleError);
@@ -201,6 +204,8 @@ app.post("/query", (req, res) => {
 
 app.post("/disambiguate", (req, res) => {
   appData.artistId = req.body.artistId;
+  appData.artistName =
+    appData.artists.filter((artist) => artist.id === appData.artistId)[0].name;
   getAlbums(appData.artistId)
     .then((albums) => {
       appData.albums = parseAlbums(albums);

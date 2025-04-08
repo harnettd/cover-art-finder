@@ -1,14 +1,13 @@
 <section id="query">
   <h2>Query Artist</h2>
-    <form action="/query" method="post" class="row">
-      <div class="col">
-        <% if (appData.artistId) { %>
+    <form action="/query" method="post">
+        <% if (appData.artistName) { %>
           <input
             type="text"
             name="query"
             id="query"
             class="form-control"
-            value="<%= appData.artistId %>"
+            value="<%= appData.artistName %>"
             disabled
           />
         <% } else if (appData.query) { %>
@@ -30,15 +29,11 @@
             placeholder="Artist Name"
           />
         <% } %>
-      </div>
-      <div class="col-2">
           <% if (appData.artistName || appData.query) { %>
             <input type="submit" class="btn btn-primary" value="Submit" disabled />
           <% } else { %>
             <input type="submit" class="btn btn-primary" value="Submit" />
           <% } %>
-      </div>
-      <div class="col-2">
           <input
             type="submit"
             class="btn btn-primary"
@@ -46,6 +41,5 @@
             formaction="/clear"
             formmethod="get"
           />
-      </div>
   </form>
 </section>

@@ -17,37 +17,11 @@
     <main class="container">
       <%- include("partials/header.ejs") %>
       <%- include("partials/query.ejs") %>
-
-      <% if (appData.artists.length >= 1 && !appData.artistId) { %>
-      <section id="disambiguation">
-        <h2>Disambiguation</h2>
-        <form action="/disambiguate" method="post">
-          <% appData.artists.forEach((artist) => { %>
-          <div class="form-check">
-            <input
-              type="radio"
-              class="form-check-input"
-              name="artistId"
-              id="<%= artist.id %>"
-              value="<%= artist.id %>"
-            />
-            <label class="form-check-label" for="<%= artist.id %>">
-              <ul>
-                <li>Name: <%= artist.name %></li>
-                <li>Score: <%= artist.score %></li>
-                <li>Country: <%= artist.country %></li>
-                <li>Note: <%= artist.disambiguation %></li>
-              </ul>
-            </label>
-          </div>
-          <% }) %>
-          <input type="submit" class="btn btn-primary" value="Submit" />
-        </form>
-      </section>
-      <% } %> <% if (appData.albums.length > 0) { %>
+      <%- include("partials/disambiguate.ejs") %>
+      
+      <% if (appData.albums.length > 0) { %>
       <section id="album-selection">
         <h2>Album Selection</h2>
-        <p>Select albums by <%= appData.artistId %>:</p>
         <form action="/album-selection" method="post">
           <% appData.albums.forEach((album) => { %>
           <div class="form-check">

@@ -180,7 +180,8 @@ const parseCoverArt = ({ data: { images } }) => {
 
 app.get("/", (req, res) => {
   res.locals.appData = appData;
-  res.render("index.ejs", { appData: res.locals.appData });
+  // res.render("index.ejs", { appData: res.locals.appData });
+  res.render("index.ejs", res.locals);
 });
 
 app.get("/clear", (req, res) => {

@@ -167,11 +167,13 @@ const getCoverArt = (albumId) => {
 };
 
 const parseCoverArt = ({ data: { images } }) => {
-  return images
-    .filter((image) => image.front && image.thumbnails["250"])
-    .reduce((result, image) => {
-      return result ? result : image.thumbnails["250"];
-    }, null);
+  // console.log(images);
+  return images.map(image => image.thumbnails.large);
+  // return images
+  //   .filter((image) => image.front && image.thumbnails["250"])
+  //   .reduce((result, image) => {
+  //     return result ? result : image.thumbnails["250"];
+  //   }, null);
 };
 
 // Routes
@@ -216,7 +218,7 @@ app.post("/album-selection", (req, res) => {
       appData.coverArtUrls = responses.map((response) => {
         return parseCoverArt(response);
       });
-      console.log(appData.coverArtUrls);
+      // console.log(appData.coverArtUrls);
       res.redirect("/");
     })
     .catch(handleError);

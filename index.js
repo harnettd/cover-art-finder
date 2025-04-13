@@ -135,10 +135,9 @@ const getPreferred = (album, candidate) =>
   isPreferredCountry(album, candidate) ? candidate : album;
 
 const deduplicate = (reducedAlbums, candidate) => {
-  const idxDuplicate =
-    reducedAlbums
-      .map((a) => isSameTitle(a, candidate))
-      .indexOf(true);
+  const idxDuplicate = reducedAlbums
+    .map((a) => isSameTitle(a, candidate))
+    .indexOf(true);
 
   if (idxDuplicate === -1) {
     return reducedAlbums.concat(candidate);
@@ -168,7 +167,7 @@ const getCoverArt = (albumId) => {
 
 const parseCoverArt = ({ data: { images } }) => {
   // console.log(images);
-  return images.map(image => image.thumbnails.large);
+  return images.map((image) => image.thumbnails.large);
   // return images
   //   .filter((image) => image.front && image.thumbnails["250"])
   //   .reduce((result, image) => {
@@ -193,19 +192,31 @@ app.post("/query", (req, res) => {
   searchArtist(appData.query)
     .then((response) => {
       appData.artists = parseArtists(response);
-      if (appData.artists.length === 1) {
+      const numArtists = appData.artists.length;
+      if (numArtists === 0) {
+        // error
+        console.log("Error");
+      } else if (appData.artists.length === 1) {
         appData.artistId = appData.artists[0].id;
         appData.artistName = appData.artists[0].name;
+        getAlbums(appData.artistId)
+          .then((albums) => {
+            appData.albums = parseAlbums(albums);
+            res.redirect("/");
+          })
+          .catch(handleError);
+      } else {
+        res.redirect("/");
       }
-      res.redirect("/");
     })
     .catch(handleError);
 });
 
 app.post("/disambiguate", (req, res) => {
   appData.artistId = req.body.artistId;
-  appData.artistName =
-    appData.artists.filter((artist) => artist.id === appData.artistId)[0].name;
+  appData.artistName = appData.artists.filter(
+    (artist) => artist.id === appData.artistId
+  )[0].name;
   getAlbums(appData.artistId)
     .then((albums) => {
       appData.albums = parseAlbums(albums);

@@ -1,11 +1,11 @@
 <% if (appData.coverArtUrls.length > 0) { %>
-    <section id="cover-art">
-      <div class="row">
-        <% appData.coverArtUrls.forEach((url) => { %>
-        <div class="col">
-          <img src="<%= url %>" alt="" />
-        </div>
-        <% }) %>
-      </div>
-    </section>
-    <% } %>
+	<section id="cover-art">
+		<div class="row">
+			<% appData.coverArtUrls.forEach((url) => { %>
+				<div class="col">
+					<img src="<%= url %>" alt="" />
+				</div>
+			<% }) %>
+		</div>
+	</section>
+<% } %>

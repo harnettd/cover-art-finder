@@ -1,21 +1,21 @@
-<% if (appData.albums.length > 0) { %>
-    <section id="album-selection">
-      <h2>Album Selection</h2>
-      <form action="/album-selection" method="post">
-        <% appData.albums.forEach((album) => { %>
-        <div class="form-check">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            name="<%= album.id %>"
-            id="<%= album.id %>"
-          />
-          <label class="form-check-label" for="<%= album.id %>">
-            <%= album.title %>
-          </label>
-        </div>
-        <% }) %>
-        <input type="submit" class="btn btn-primary" value="Submit" />
-      </form>
-    </section>
-    <% } %> 
+<% if (appData.artistName && appData.albums.length > 0) { %>
+	<section id="album-selection">
+		<h2>Album Selection</h2>
+		<form action="/album-selection" method="post">
+			<% appData.albums.forEach((album) => { %>
+				<div class="form-check">
+					<input
+						class="form-check-input"
+						type="checkbox"
+						name="<%= album.id %>"
+						id="<%= album.id %>"
+					/>
+					<label class="form-check-label" for="<%= album.id %>">
+						<%= album.title %>
+					</label>
+				</div>
+			<% }) %>
+			<input type="submit" class="btn btn-primary" value="Submit" />
+		</form>
+	</section>
+<% } %> 

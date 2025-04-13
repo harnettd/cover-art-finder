@@ -1,45 +1,45 @@
 <section id="query">
   <h2>Query Artist</h2>
     <form action="/query" method="post">
-        <% if (appData.artistName) { %>
-          <input
-            type="text"
-            name="query"
-            id="query"
-            class="form-control"
-            value="<%= appData.artistName %>"
-            disabled
-          />
-        <% } else if (appData.query) { %>
-          <input
-            type="text"
-            name="query"
-            id="query"
-            class="form-control"
-            value="<%= appData.query %>"
-            disabled
-          />
-        <% } else { %>
-          <input 
-            type="text" 
-            name="query" 
-            id="query" 
-            class="form-control" 
-            required
-            placeholder="Artist Name"
-          />
-        <% } %>
-          <% if (appData.artistName || appData.query) { %>
-            <input type="submit" class="btn btn-primary" value="Submit" disabled />
-          <% } else { %>
-            <input type="submit" class="btn btn-primary" value="Submit" />
-          <% } %>
-          <input
-            type="submit"
-            class="btn btn-primary"
-            value="Clear"
-            formaction="/clear"
-            formmethod="get"
-          />
+      <% if (appData.artistName) { %>
+        <input
+          type="text"
+          name="query"
+          id="query"
+          class="form-control"
+          value="<%= appData.artistName %>"
+          disabled
+        />
+      <% } else if (appData.query) { %>
+        <input
+          type="text"
+          name="query"
+          id="query"
+          class="form-control"
+          value="<%= appData.query %>"
+          disabled
+        />
+      <% } else { %>
+        <input 
+          type="text" 
+          name="query" 
+          id="query" 
+          class="form-control" 
+          required
+          placeholder="Artist Name"
+        />
+      <% } %>
+      <% if (appData.artistName || appData.query) { %>
+        <input type="submit" class="btn btn-primary" value="Submit" disabled />
+      <% } else { %>
+        <input type="submit" class="btn btn-primary" value="Submit" />
+      <% } %>
+      <input
+        type="submit"
+        class="btn btn-primary"
+        value="Clear"
+        formaction="/clear"
+        formmethod="get"
+      />
   </form>
 </section>

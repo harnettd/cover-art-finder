@@ -161,7 +161,7 @@ const getCoverArt = (albumId) => {
     accept,
     "User-Agent": userAgent,
   };
-  return axios(url, { baseURL, headers });
+  return axios.get(url, { baseURL, headers });
 };
 
 const parseCoverArt = ({ data: { images } }) => {
@@ -187,21 +187,21 @@ app.post("/query", (req, res) => {
       appData.artists = parseArtists(response);
       const numArtists = appData.artists.length;
       if (numArtists === 0) {
-        // error
+        // TODO: show error message
         console.log("Error");
-      } else if (appData.artists.length === 1) {
-        appData.artistId = appData.artists[0].id;
-        appData.artistName = appData.artists[0].name;
-        getAlbums(appData.artistId)
+        return;
+      } else if (numArtists === 1) {
+        const artist = appData.artists[0];
+        appData.artistId = artist.id;
+        appData.artistName = artist.name;
+        return getAlbums(appData.artistId)
           .then((albums) => {
             appData.albums = parseAlbums(albums);
-            res.redirect("/");
           })
           .catch(handleError);
-      } else {
-        res.redirect("/");
       }
     })
+    .then(() => res.redirect("/"))
     .catch(handleError);
 });
 

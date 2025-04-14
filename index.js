@@ -12,6 +12,7 @@ const releaseType = "album|ep";
 const releaseStatus = "official";
 const releaseLimit = 100;
 const releaseGetDelay = 500;
+const countrySortOrder = ["XE", "US", "CA", "XW"];
 const port = 3000;
 
 // App and AppData
@@ -96,13 +97,7 @@ const getAlbums = (artistId) => {
   const getAlbumsBatch = (offset = 0) => {
     params.offset = offset;
 
-    // console.log(params);
-
     return axios.get(url, { baseURL, params, headers }).then(({ data }) => {
-      // console.log(`Offset : ${data["release-offset"]}`);
-      // console.log(`Release count: ${data["release-count"]}`);
-      // console.log(`No. releases: ${data.releases.length}\n`);
-
       const releases = data.releases;
       albums = albums.concat(releases);
       const newOffset = offset + releases.length;
@@ -124,7 +119,8 @@ const isSameTitle = (album, candidate) =>
   album.title.toLowerCase() === candidate.title.toLowerCase();
 
 const isPreferredCountry = (album, candidate) => {
-  const countrySortOrder = ["XE", "US", "CA", "XW"];
+  // Return true if the album country is lower than the candidate country 
+  // on the country sort order; false otherwise.
   return (
     countrySortOrder.indexOf(album.country) <
     countrySortOrder.indexOf(candidate.country)
@@ -139,21 +135,24 @@ const deduplicate = (reducedAlbums, candidate) => {
     .map((a) => isSameTitle(a, candidate))
     .indexOf(true);
 
+  // candidate is not a duplicate
   if (idxDuplicate === -1) {
-    return reducedAlbums.concat(candidate);
+    return reducedAlbums.concat([candidate]);
   }
 
+  // candidate is a duplicate
   const duplicate = reducedAlbums[idxDuplicate];
   return reducedAlbums
-    .filter((value, index) => index !== idxDuplicate)
-    .concat(getPreferred(duplicate, candidate));
+    .filter((val, idx) => idx !== idxDuplicate)
+    .concat([getPreferred(duplicate, candidate)]);
 };
 
 const parseAlbums = (albums) =>
   albums
     .filter((album) => album["cover-art-archive"].front)
     .map(({ id, title, country, date }) => ({ id, title, country, date }))
-    .reduce(deduplicate, []);
+    .reduce(deduplicate, [])
+    .sort((album1, album2) => album1.date < album2.date);
 
 const getCoverArt = (albumId) => {
   const url = `/release/${albumId}`;
@@ -166,13 +165,7 @@ const getCoverArt = (albumId) => {
 };
 
 const parseCoverArt = ({ data: { images } }) => {
-  // console.log(images);
   return images.map((image) => image.thumbnails.large);
-  // return images
-  //   .filter((image) => image.front && image.thumbnails["250"])
-  //   .reduce((result, image) => {
-  //     return result ? result : image.thumbnails["250"];
-  //   }, null);
 };
 
 // Routes

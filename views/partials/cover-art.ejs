@@ -1,9 +1,9 @@
 <% if (appData.coverArtUrls.length > 0) { %>
-	<section id="cover-art">
-		<div class="row">
+	<section id="cover-art" class="mb-3">
+		<div class="row gy-3">
 			<% appData.coverArtUrls.forEach((url) => { %>
 				<div class="col">
-					<img src="<%= url %>" alt="" />
+					<img class="album-cover" src="<%= url %>" alt="An album cover" />
 				</div>
 			<% }) %>
 		</div>

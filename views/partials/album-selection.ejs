@@ -1,6 +1,6 @@
 <% if (appData.artistName && appData.albums.length > 0) { %>
-	<section id="album-selection">
-		<h2>Album Selection</h2>
+	<section id="album-selection" class="mb-3">
+		<p class="mb-1">Select albums</p>
 		<form action="/album-selection" method="post">
 			<% appData.albums.forEach((album) => { %>
 				<div class="form-check">
@@ -15,7 +15,7 @@
 					</label>
 				</div>
 			<% }) %>
-			<input type="submit" class="btn btn-primary" value="Submit" />
+			<input type="submit" class="btn btn-primary mt-1" value="Submit" />
 		</form>
 	</section>
 <% } %> 

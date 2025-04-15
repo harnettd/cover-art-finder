@@ -1,6 +1,6 @@
 <% if (appData.artists.length > 0 && !appData.artistId) { %>
-	<section id="disambiguate">
-		<h2>Disambiguate</h2>
+	<section id="disambiguate" class="mb-3">
+		<p class="mb-1">Disambiguate</p>
 			<form action="/disambiguate" method="post">
 				<% appData.artists.forEach((artist) => { %>
 					<div class="form-check">
@@ -12,16 +12,14 @@
 								value="<%= artist.id %>"
 							/>
 							<label class="form-check-label" for="<%= artist.id %>">
-								<ul>
-									<li>Name: <%= artist.name %></li>
-									<li>Score: <%= artist.score %></li>
-									<li>Country: <%= artist.country %></li>
-									<li>Note: <%= artist.disambiguation %></li>
-								</ul>
+								<%= artist.name %>
+								(Score: <strong><%= artist.score%></strong>)
+								<%= artist.country %>,
+								<em><%= artist.disambiguation %></em>
 							</label>
 					</div>
 				<% }) %>
-				<input type="submit" class="btn btn-primary" value="Submit" />
+				<input type="submit" class="btn btn-primary rounded-2 mt-1" value="Submit" />
 			</form>
 	</section>
 <% } %>

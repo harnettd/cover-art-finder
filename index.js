@@ -228,7 +228,6 @@ app.post("/album-selection", (req, res) => {
       appData.coverArtUrls = responses.map((response) => {
         return parseCoverArt(response);
       });
-      // console.log(appData.coverArtUrls);
       res.redirect("/");
     })
     .catch(handleError);

@@ -1,45 +1,61 @@
 <section id="query">
-  <h2>Query Artist</h2>
-    <form action="/query" method="post">
+  <form action="/query" method="post" class="mb-3">
+    <label for="query" class="form-label">Artist query</label>
+    <div class="input-group gap-1">
       <% if (appData.artistName) { %>
-        <input
-          type="text"
-          name="query"
-          id="query"
-          class="form-control"
-          value="<%= appData.artistName %>"
-          disabled
-        />
+          <input
+            type="text"
+            name="query"
+            id="query"
+            class="form-control rounded-2"
+            value="<%= appData.artistName %>"
+            disabled
+          />
       <% } else if (appData.query) { %>
-        <input
-          type="text"
-          name="query"
-          id="query"
-          class="form-control"
-          value="<%= appData.query %>"
-          disabled
-        />
+          <input
+              type="text"
+              name="query"
+              id="query"
+              class="form-control rounded-2"
+              value="<%= appData.query %>"
+              disabled
+          />
       <% } else { %>
         <input 
           type="text" 
           name="query" 
           id="query" 
-          class="form-control" 
+          class="form-control rounded-2" 
           required
-          placeholder="Artist Name"
-        />
+          />
       <% } %>
       <% if (appData.artistName || appData.query) { %>
-        <input type="submit" class="btn btn-primary" value="Submit" disabled />
+        <span>
+          <input 
+            type="submit" 
+            class="btn btn-primary rounded-2" 
+            value="Submit" 
+            disabled 
+          />
+        </span>
       <% } else { %>
-        <input type="submit" class="btn btn-primary" value="Submit" />
+        <span>
+          <input 
+            type="submit" 
+            class="btn btn-primary rounded-2" 
+            value="Submit" 
+          />
+        </span>
       <% } %>
-      <input
-        type="submit"
-        class="btn btn-primary"
-        value="Clear"
-        formaction="/clear"
-        formmethod="get"
-      />
+      <span>
+        <input
+          type="submit"
+          class="btn btn-primary rounded-2"
+          value="Clear"
+          formaction="/clear"
+          formmethod="get"
+        /> 
+      </span>
+    </div>
   </form>
 </section>

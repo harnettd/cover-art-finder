@@ -6,7 +6,7 @@ import {
   accept,
   userAgent,
 } from "./modules/settings.js";
-import { searchArtist, parseArtists, searchParseArtists } from "./modules/search-parse-artists.js"
+import { getParseArtists } from "./modules/get-parse-artists.js"
 import { handleError } from "./modules/handle-error.js";
 
 const releaseType = "album|ep";
@@ -143,29 +143,28 @@ app.get("/clear", (req, res) => {
   res.redirect("/");
 });
 
-app.post("/query", (req, res) => {
+app.post("/query", async (req, res) => {
   appData.query = req.body.query;
-  searchArtist(appData.query)
-    .then((response) => {
-      appData.artists = parseArtists(response);
-      const numArtists = appData.artists.length;
-      if (numArtists === 0) {
-        // TODO: show error message
-        console.log("Error");
-        return;
-      } else if (numArtists === 1) {
-        const artist = appData.artists[0];
-        appData.artistId = artist.id;
-        appData.artistName = artist.name;
-        return getAlbums(appData.artistId)
-          .then((albums) => {
-            appData.albums = parseAlbums(albums);
-          })
-          .catch(handleError);
-      }
-    })
-    .then(() => res.redirect("/"))
-    .catch(handleError);
+  appData.artists = await getParseArtists(appData.query);
+
+  const numArtists = appData.artists.length;
+  if (numArtists === 0) {
+    // TODO: show error message
+    console.log("Error: empty appData.artists");
+  } else if (numArtists === 1) {
+    const artist = appData.artists[0];
+    appData.artistId = artist.id;
+    appData.artistName = artist.name;
+    try {
+      const albums = await getAlbums(appData.artistId);
+      appData.albums = parseAlbums(albums);
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  console.log(appData.artists);
+  res.redirect("/");
 });
 
 app.post("/disambiguate", (req, res) => {

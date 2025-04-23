@@ -1,9 +1,5 @@
 import axios from "axios";
-import {
-    musicBrainzApiBaseUrl,
-    accept,
-    userAgent,
-} from "./settings.js";
+import { musicBrainzApiBaseUrl, accept, userAgent } from "./settings.js";
 import { handleError } from "./handle-error.js";
 
 const minArtistScore = 75;
@@ -30,15 +26,15 @@ const parseArtists = ({ data: { artists } }) =>
       disambiguation,
     }));
 
-const searchParseArtists = async (query) => {
-    let artists = [];
-    try {
-        const response = await searchArtist(query);
-        artists = parseArtists(response);
-    } catch (error) {
-        handleError(error);
-    }
-    return artists;
+const getParseArtists = async (query) => {
+  let artists = [];
+  try {
+    const response = await searchArtist(query);
+    artists = parseArtists(response);
+  } catch (error) {
+    handleError(error);
+  }
+  return artists;
 };
 
-export { searchArtist, parseArtists, searchParseArtists };
+export { getParseArtists };

@@ -7,13 +7,14 @@ import {
   userAgent,
 } from "./modules/settings.js";
 import { getParseArtists } from "./modules/get-parse-artists.js"
+import { getParseAlbums } from "./modules/get-parse-albums.js"
 import { handleError } from "./modules/handle-error.js";
 
-const releaseType = "album|ep";
-const releaseStatus = "official";
-const releaseLimit = 100;
-const releaseGetDelay = 500;
-const countrySortOrder = ["XE", "US", "CA", "XW"];
+// const releaseType = "album|ep";
+// const releaseStatus = "official";
+// const releaseLimit = 100;
+// const releaseGetDelay = 500;
+// const countrySortOrder = ["XE", "US", "CA", "XW"];
 
 // App and AppData
 
@@ -38,84 +39,6 @@ class AppData {
   }
 }
 const appData = new AppData();
-
-// Helper functions
-
-const getAlbums = (artistId) => {
-  const url = "/release";
-  const baseURL = musicBrainzApiBaseUrl;
-  const params = {
-    artist: artistId,
-    type: releaseType,
-    status: releaseStatus,
-    limit: releaseLimit,
-  };
-  const headers = {
-    accept,
-    "User-Agent": userAgent,
-  };
-
-  let albums = [];
-
-  const getAlbumsBatch = (offset = 0) => {
-    params.offset = offset;
-
-    return axios.get(url, { baseURL, params, headers }).then(({ data }) => {
-      const releases = data.releases;
-      albums = albums.concat(releases);
-      const newOffset = offset + releases.length;
-
-      if (newOffset >= data["release-count"]) {
-        return albums;
-      }
-
-      return new Promise((resolve, reject) => {
-        setTimeout(() => resolve(getAlbumsBatch(newOffset)), releaseGetDelay);
-      });
-    });
-  };
-
-  return getAlbumsBatch();
-};
-
-const isSameTitle = (album, candidate) =>
-  album.title.toLowerCase() === candidate.title.toLowerCase();
-
-const isPreferredCountry = (album, candidate) => {
-  // Return true if the album country is lower than the candidate country 
-  // on the country sort order; false otherwise.
-  return (
-    countrySortOrder.indexOf(album.country) <
-    countrySortOrder.indexOf(candidate.country)
-  );
-};
-
-const getPreferred = (album, candidate) =>
-  isPreferredCountry(album, candidate) ? candidate : album;
-
-const deduplicate = (reducedAlbums, candidate) => {
-  const idxDuplicate = reducedAlbums
-    .map((a) => isSameTitle(a, candidate))
-    .indexOf(true);
-
-  // candidate is not a duplicate
-  if (idxDuplicate === -1) {
-    return reducedAlbums.concat([candidate]);
-  }
-
-  // candidate is a duplicate
-  const duplicate = reducedAlbums[idxDuplicate];
-  return reducedAlbums
-    .filter((val, idx) => idx !== idxDuplicate)
-    .concat([getPreferred(duplicate, candidate)]);
-};
-
-const parseAlbums = (albums) =>
-  albums
-    .filter((album) => album["cover-art-archive"].front)
-    .map(({ id, title, country, date }) => ({ id, title, country, date }))
-    .reduce(deduplicate, [])
-    .sort((album1, album2) => album1.date < album2.date);
 
 const getCoverArt = (albumId) => {
   const url = `/release/${albumId}`;
@@ -155,29 +78,20 @@ app.post("/query", async (req, res) => {
     const artist = appData.artists[0];
     appData.artistId = artist.id;
     appData.artistName = artist.name;
-    try {
-      const albums = await getAlbums(appData.artistId);
-      appData.albums = parseAlbums(albums);
-    } catch (error) {
-      handleError(error);
-    }
+    appData.albums = await getParseAlbums(appData.artistId);
   }
 
-  console.log(appData.artists);
   res.redirect("/");
 });
 
-app.post("/disambiguate", (req, res) => {
+app.post("/disambiguate", async (req, res) => {
   appData.artistId = req.body.artistId;
   appData.artistName = appData.artists.filter(
     (artist) => artist.id === appData.artistId
   )[0].name;
-  getAlbums(appData.artistId)
-    .then((albums) => {
-      appData.albums = parseAlbums(albums);
-      res.redirect("/");
-    })
-    .catch(handleError);
+
+  appData.albums = await getParseAlbums(appData.artistId);
+  res.redirect("/");
 });
 
 app.post("/album-selection", (req, res) => {

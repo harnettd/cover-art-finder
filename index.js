@@ -1,25 +1,26 @@
 import express from "express";
 import axios from "axios";
+import {
+  musicBrainzApiBaseUrl,
+  coverArtArchiveApiBaseUrl,
+  accept,
+  userAgent,
+} from "./modules/settings.js";
+import { searchArtist, parseArtists, searchParseArtists } from "./modules/search-parse-artists.js"
+import { handleError } from "./modules/handle-error.js";
 
-// Global variables
-
-const musicBrainzApiBaseUrl = "https://musicbrainz.org/ws/2";
-const coverArtArchiveApiBaseUrl = "https://coverartarchive.org";
-const accept = "application/json";
-const userAgent = "cover-art-finder/1.0.0 (DHarnett.dev@proton.me)";
-const minArtistScore = 75;
 const releaseType = "album|ep";
 const releaseStatus = "official";
 const releaseLimit = 100;
 const releaseGetDelay = 500;
 const countrySortOrder = ["XE", "US", "CA", "XW"];
-const port = 3000;
 
 // App and AppData
 
 const app = express();
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
+const port = 3000;
 
 class AppData {
   constructor() {
@@ -39,44 +40,6 @@ class AppData {
 const appData = new AppData();
 
 // Helper functions
-
-const handleError = (error) => {
-  if (error.response) {
-    console.log("response error");
-    console.log(error.response.status);
-    console.log(error.response.headers);
-    console.log(error.response.data);
-  } else if (error.request) {
-    console.log("request error");
-    console.log(error.request);
-  } else {
-    console.log("other error");
-    console.log(error.message);
-  }
-  console.log(error.config);
-};
-
-const searchArtist = (query) => {
-  const url = "/artist";
-  const baseURL = musicBrainzApiBaseUrl;
-  const params = { query };
-  const headers = {
-    accept,
-    "User-Agent": userAgent,
-  };
-  return axios.get(url, { baseURL, params, headers });
-};
-
-const parseArtists = ({ data: { artists } }) =>
-  artists
-    .filter(({ score }) => score >= minArtistScore)
-    .map(({ id, name, score, country, disambiguation }) => ({
-      id,
-      name,
-      score,
-      country,
-      disambiguation,
-    }));
 
 const getAlbums = (artistId) => {
   const url = "/release";

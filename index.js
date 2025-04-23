@@ -1,20 +1,8 @@
 import express from "express";
-import axios from "axios";
-import {
-  musicBrainzApiBaseUrl,
-  coverArtArchiveApiBaseUrl,
-  accept,
-  userAgent,
-} from "./modules/settings.js";
-import { getParseArtists } from "./modules/get-parse-artists.js"
-import { getParseAlbums } from "./modules/get-parse-albums.js"
-import { handleError } from "./modules/handle-error.js";
 
-// const releaseType = "album|ep";
-// const releaseStatus = "official";
-// const releaseLimit = 100;
-// const releaseGetDelay = 500;
-// const countrySortOrder = ["XE", "US", "CA", "XW"];
+import { getParseArtists } from "./modules/get-parse-artists.js";
+import { getParseAlbums } from "./modules/get-parse-albums.js";
+import { getParseCoverArt } from "./modules/get-parse-cover-art.js";
 
 // App and AppData
 
@@ -38,21 +26,8 @@ class AppData {
     this.coverArtUrls = [];
   }
 }
+
 const appData = new AppData();
-
-const getCoverArt = (albumId) => {
-  const url = `/release/${albumId}`;
-  const baseURL = coverArtArchiveApiBaseUrl;
-  const headers = {
-    accept,
-    "User-Agent": userAgent,
-  };
-  return axios.get(url, { baseURL, headers });
-};
-
-const parseCoverArt = ({ data: { images } }) => {
-  return images.map((image) => image.thumbnails.large);
-};
 
 // Routes
 
@@ -96,17 +71,15 @@ app.post("/disambiguate", async (req, res) => {
 
 app.post("/album-selection", (req, res) => {
   appData.albumIds = Object.keys(req.body);
+
   const coverArtPromises = appData.albumIds.map((albumId) =>
-    getCoverArt(albumId)
+    getParseCoverArt(albumId)
   );
-  Promise.all(coverArtPromises)
-    .then((responses) => {
-      appData.coverArtUrls = responses.map((response) => {
-        return parseCoverArt(response);
-      });
-      res.redirect("/");
-    })
-    .catch(handleError);
+
+  Promise.all(coverArtPromises).then((responses) => {
+    appData.coverArtUrls = responses;
+    res.redirect("/");
+  });
 });
 
 // Listen

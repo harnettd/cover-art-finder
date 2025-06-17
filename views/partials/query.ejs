@@ -1,14 +1,14 @@
 <section id="query" class="mb-3">
   <form action="/query" method="post">
     <label for="query" class="form-label">Artist query</label>
-    <div class="input-group gap-1">
+    <div class="input-group gap-1 mb-1">
       <input
         type="text"
         name="query"
         id="query"
         class="form-control rounded-2"
-        value="<%= appData.ui.query.input.value %>"
-        <% if (appData.ui.query.input.isDisabled) { %>
+        value="<%= appData.query.input.value %>"
+        <% if (appData.query.input.isDisabled) { %>
           disabled
         <% } %>
       />
@@ -17,7 +17,7 @@
           type="submit" 
           class="btn btn-primary rounded-2" 
           value="Submit" 
-          <% if (appData.ui.query.submit.isDisabled) { %>
+          <% if (appData.query.submit.isDisabled) { %>
             disabled
           <% } %>
         />
@@ -32,5 +32,8 @@
         /> 
       </span>
     </div>
+    <% if (appData.query.isFailed) { %>
+      <p class="text-danger">The search returned no matches.</p>
+    <% } %>
   </form>
 </section>

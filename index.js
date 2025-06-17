@@ -18,14 +18,13 @@ class AppData {
 
   clear() {
 
-    this.ui = {
-      query: {
-        input: {
-          value: "",
-          isDisabled: false,
-        },
-        submit: { isDisabled: false },
+    this.query = {
+      input: {
+        value: "",
+        isDisabled: false,
       },
+      submit: { isDisabled: false },
+      isFailed: false
     };
 
     this.artists = [];
@@ -38,6 +37,15 @@ class AppData {
 }
 
 const appData = new AppData();
+
+//  Helper functions
+
+const handleArtist = async ({ name, id }) => {
+    appData.query.input.value = name;
+    appData.query.input.isDisabled = true;
+    appData.query.submit.isDisabled = true;
+    appData.albums = await getParseAlbums(id);
+};
 
 // Routes
 
@@ -53,23 +61,14 @@ app.get("/clear", (req, res) => {
 
 app.post("/query", async (req, res) => {
   const query = req.body.query;
-  appData.ui.query.input.value = query;
-  appData.artists = await getParseArtists(query);
-
+  appData.query.input.value = query;
+  appData.artists = await getParseArtists(query);  
   const numArtists = appData.artists.length;
-  if (numArtists === 0) {
-    // TODO: show error message
-    console.log("Error: empty appData.artists");
-  } else if (numArtists === 1) {
+  appData.query.isFailed = numArtists === 0;
+  if (numArtists === 1) {
     const artist = appData.artists[0];
-    appData.artistId = artist.id;
-    appData.artistName = artist.name;
-    appData.ui.query.input.value = appData.artistName;
-    appData.ui.query.input.isDisabled = true;
-    appData.ui.query.submit.isDisabled = true;
-    appData.albums = await getParseAlbums(appData.artistId);
+    await handleArtist(artist);
   }
-
   res.redirect("/");
 });
 
@@ -79,11 +78,11 @@ app.post("/disambiguate", async (req, res) => {
     (artist) => artist.id === appData.artistId
   )[0].name;
 
-  appData.ui.query.input.value = appData.artistName;
-  appData.ui.query.input.isDisabled = true;
-  appData.ui.query.submit.isDisabled = true;
-
+  appData.query.input.value = appData.artistName;
+  appData.query.input.isDisabled = true;
+  appData.query.submit.isDisabled = true;
   appData.albums = await getParseAlbums(appData.artistId);
+
   res.redirect("/");
 });
 

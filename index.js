@@ -28,8 +28,6 @@ class AppData {
     };
 
     this.artists = [];
-    this.artistId = "";
-    this.artistName = "";
     this.albums = [];
     this.albumIds = [];
     this.coverArtUrls = [];
@@ -73,16 +71,10 @@ app.post("/query", async (req, res) => {
 });
 
 app.post("/disambiguate", async (req, res) => {
-  appData.artistId = req.body.artistId;
-  appData.artistName = appData.artists.filter(
-    (artist) => artist.id === appData.artistId
-  )[0].name;
-
-  appData.query.input.value = appData.artistName;
-  appData.query.input.isDisabled = true;
-  appData.query.submit.isDisabled = true;
-  appData.albums = await getParseAlbums(appData.artistId);
-
+  const artistId = req.body.artistId;
+  const artist = appData.artists.find(({ id }) => id === artistId);
+  appData.artists = [artist];
+  await handleArtist(artist);
   res.redirect("/");
 });
 

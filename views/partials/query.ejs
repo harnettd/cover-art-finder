@@ -2,58 +2,26 @@
   <form action="/query" method="post">
     <label for="query" class="form-label">Artist query</label>
     <div class="input-group gap-1">
-      <% if (appData.artistName) { %>
-          <input
-            type="text"
-            name="query"
-            id="query"
-            class="form-control rounded-2"
-            value="<%= appData.ui.query.input.value %>"
-            <% if (appData.ui.query.input.isDisabled) { %>
-              disabled 
-            <% } %>
-          />
-      <% } else if (appData.query) { %>
-          <input
-              type="text"
-              name="query"
-              id="query"
-              class="form-control rounded-2"
-              value="<%= appData.ui.query.input.value %>"    
-              <% if (appData.ui.query.input.isDisabled) { %>
-                disabled 
-              <% } %>      
-          />
-      <% } else { %>
+      <input
+        type="text"
+        name="query"
+        id="query"
+        class="form-control rounded-2"
+        value="<%= appData.ui.query.input.value %>"
+        <% if (appData.ui.query.input.isDisabled) { %>
+          disabled 
+        <% } %>
+      />
+      <span>
         <input 
-          type="text" 
-          name="query" 
-          id="query" 
-          class="form-control rounded-2" 
-          value="<%= appData.ui.query.input.value %>"
-          required
-          />
-      <% } %>
-      <% if (appData.artistName || appData.query) { %>
-        <span>
-          <input 
-            type="submit" 
-            class="btn btn-primary rounded-2" 
-            value="Submit" 
-            <% if (appData.ui.query.submit.isDisabled) { %>
-              disabled
-            <% } %>
-          />
-        </span>
-      <% } else { %>
-        <span>
-          <input 
-            type="submit" 
-            class="btn btn-primary rounded-2" 
-            value="Submit" 
-          />
-        </span>
-      <% } %>
+          type="submit" 
+          class="btn btn-primary rounded-2" 
+          value="Submit" 
+          <% if (appData.ui.query.submit.isDisabled) { %>
+            disabled
+          <% } %>
+        />
+      </span>
       <span>
         <input
           type="submit"

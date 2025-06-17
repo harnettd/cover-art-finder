@@ -8,8 +8,10 @@
             name="query"
             id="query"
             class="form-control rounded-2"
-            value="<%= appData.artistName %>"
-            disabled
+            value="<%= appData.ui.query.input.value %>"
+            <% if (appData.ui.query.input.isDisabled) { %>
+              disabled 
+            <% } %>
           />
       <% } else if (appData.query) { %>
           <input
@@ -17,8 +19,10 @@
               name="query"
               id="query"
               class="form-control rounded-2"
-              value="<%= appData.query %>"
-              disabled
+              value="<%= appData.ui.query.input.value %>"    
+              <% if (appData.ui.query.input.isDisabled) { %>
+                disabled 
+              <% } %>      
           />
       <% } else { %>
         <input 
@@ -26,6 +30,7 @@
           name="query" 
           id="query" 
           class="form-control rounded-2" 
+          value="<%= appData.ui.query.input.value %>"
           required
           />
       <% } %>
@@ -35,7 +40,9 @@
             type="submit" 
             class="btn btn-primary rounded-2" 
             value="Submit" 
-            disabled 
+            <% if (appData.ui.query.submit.isDisabled) { %>
+              disabled
+            <% } %>
           />
         </span>
       <% } else { %>

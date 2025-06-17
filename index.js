@@ -17,6 +17,17 @@ class AppData {
   }
 
   clear() {
+
+    this.ui = {
+      query: {
+        input: {
+          value: "",
+          isDisabled: false,
+        },
+        submit: { isDisabled: false },
+      },
+    };
+
     this.query = "";
     this.artists = [];
     this.artistId = "";
@@ -43,6 +54,7 @@ app.get("/clear", (req, res) => {
 
 app.post("/query", async (req, res) => {
   appData.query = req.body.query;
+  appData.ui.query.input.value = req.body.query;
   appData.artists = await getParseArtists(appData.query);
 
   const numArtists = appData.artists.length;
@@ -53,6 +65,9 @@ app.post("/query", async (req, res) => {
     const artist = appData.artists[0];
     appData.artistId = artist.id;
     appData.artistName = artist.name;
+    appData.ui.query.input.value = appData.artistName;
+    appData.ui.query.input.isDisabled = true;
+    appData.ui.query.submit.isDisabled = true;
     appData.albums = await getParseAlbums(appData.artistId);
   }
 
@@ -64,6 +79,10 @@ app.post("/disambiguate", async (req, res) => {
   appData.artistName = appData.artists.filter(
     (artist) => artist.id === appData.artistId
   )[0].name;
+
+  appData.ui.query.input.value = appData.artistName;
+  appData.ui.query.input.isDisabled = true;
+  appData.ui.query.submit.isDisabled = true;
 
   appData.albums = await getParseAlbums(appData.artistId);
   res.redirect("/");

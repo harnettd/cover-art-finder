@@ -9,6 +9,9 @@
 						type="checkbox"
 						name="<%= album.id %>"
 						id="<%= album.id %>"
+            <% if (album.isChecked) { %>
+              checked
+            <% } %>  
 					/>
 					<label class="form-check-label" for="<%= album.id %>">
 						<%= album.title %>

@@ -79,7 +79,13 @@ app.post("/disambiguate", async (req, res) => {
 });
 
 app.post("/album-selection", (req, res) => {
+  console.log(req.body);
+
   appData.albumIds = Object.keys(req.body);
+
+  appData.albums.forEach((album) => {
+    album.isChecked = appData.albumIds.indexOf(album.id) >= 0;
+  });
 
   const coverArtPromises = appData.albumIds.map((albumId) =>
     getParseCoverArt(albumId)

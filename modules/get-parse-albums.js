@@ -81,7 +81,9 @@ const deduplicate = (reducedAlbums, candidate) => {
 const parseAlbums = (albums) =>
   albums
     .filter((album) => album["cover-art-archive"].front)
-    .map(({ id, title, country, date }) => ({ id, title, country, date }))
+    .map(({ id, title, country, date }) => (
+      { id, title, country, date, isChecked: false }
+    ))
     .reduce(deduplicate, [])
     .sort((album1, album2) => album1.date < album2.date);
 

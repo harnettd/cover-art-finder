@@ -1,8 +1,8 @@
 import express from "express";
 
-import { getParseArtists } from "./modules/get-parse-artists.js";
-import { getParseAlbums } from "./modules/get-parse-albums.js";
-import { getParseCoverArt } from "./modules/get-parse-cover-art.js";
+import getParseArtists from "./modules/get-parse-artists.js";
+import getParseAlbums from "./modules/get-parse-albums.js";
+import getParseCoverArt from "./modules/get-parse-cover-art.js";
 
 // App and AppData
 
@@ -28,7 +28,6 @@ class AppData {
       },
     };
 
-    this.query = "";
     this.artists = [];
     this.artistId = "";
     this.artistName = "";
@@ -53,9 +52,9 @@ app.get("/clear", (req, res) => {
 });
 
 app.post("/query", async (req, res) => {
-  appData.query = req.body.query;
-  appData.ui.query.input.value = req.body.query;
-  appData.artists = await getParseArtists(appData.query);
+  const query = req.body.query;
+  appData.ui.query.input.value = query;
+  appData.artists = await getParseArtists(query);
 
   const numArtists = appData.artists.length;
   if (numArtists === 0) {

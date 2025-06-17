@@ -38,4 +38,4 @@ const getParseArtists = async (query) => {
   return artists;
 };
 
-export { getParseArtists };
+export default getParseArtists;

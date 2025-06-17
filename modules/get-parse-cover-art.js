@@ -28,4 +28,4 @@ const getParseCoverArt = async (albumId) => {
   return coverArtUrls;
 };
 
-export { getParseCoverArt };
+export default getParseCoverArt;

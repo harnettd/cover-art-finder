@@ -96,4 +96,4 @@ const getParseAlbums = async (artistId) => {
   return parsedAlbums;
 };
 
-export { getParseAlbums };
+export default getParseAlbums;
